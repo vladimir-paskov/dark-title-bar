@@ -1,0 +1,2 @@
+#define SHELLHOOK_API __declspec(dllexport)
+#define SHELLHOOK_API __declspec(dllimport)
