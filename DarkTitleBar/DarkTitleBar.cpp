@@ -17,12 +17,23 @@
 static const GUID uidTrayIcon =
 { 0xb8161de2, 0xf837, 0x4b5e, { 0x90, 0xfb, 0x9b, 0xf8, 0xc1, 0x54, 0xc, 0xc9 } };
 
+enum class PreferredAppMode {
+	Default,
+	AllowDark,
+	ForceDark,
+	ForceLight,
+	Max
+};
+
+using fnSetPreferredAppMode = PreferredAppMode(WINAPI*)(PreferredAppMode appMode); // ordinal 135, in 1903
+
 // Global Variables:
 HINSTANCE gl_hInstance;                                // current instance
 HMENU gl_hTrayMenu;
 
 HANDLE gl_hHelper32;
 HANDLE gl_hHelper64;
+HMODULE gl_hUxTheme;
 
 // Forward declarations of functions included in this code module:
 ATOM                RegisterDarkTitleBarClass(HINSTANCE hInstance);
@@ -93,6 +104,14 @@ ATOM RegisterDarkTitleBarClass(HINSTANCE hInstance)
 BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
 	gl_hInstance = hInstance; // Store instance handle in our global variable
+
+	gl_hUxTheme = LoadLibraryEx(TEXT("uxtheme.dll"), NULL, LOAD_LIBRARY_SEARCH_SYSTEM32);
+
+	if (gl_hUxTheme != NULL) {
+		fnSetPreferredAppMode SetPreferredAppMode;
+		SetPreferredAppMode = (fnSetPreferredAppMode)GetProcAddress(gl_hUxTheme, MAKEINTRESOURCEA(135));
+		SetPreferredAppMode(PreferredAppMode::AllowDark);
+	}
 
 	HWND hWnd = CreateWindow(WND_CLASS_NAME, WND_CLASS_NAME, WS_OVERLAPPEDWINDOW,
 		CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, (HWND)NULL, (HMENU)NULL, hInstance, NULL);
@@ -208,6 +227,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				TerminateProcess(gl_hHelper64, 0);
 			}
 #endif
+
+			if (gl_hUxTheme != NULL) {
+				FreeLibrary(gl_hUxTheme);
+			}
 
 			PostQuitMessage(0);
 			break;
