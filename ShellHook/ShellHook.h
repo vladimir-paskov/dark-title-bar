@@ -11,5 +11,7 @@
 #endif
 
 extern "C" {
+	SHELLHOOK_API BOOL IsDarkMode();
+	SHELLHOOK_API VOID DwmUseImmersiveDarkModeIfNeeded(_In_ HWND hWnd);
 	SHELLHOOK_API LRESULT CALLBACK ShellProc(_In_ int nCode, _In_ WPARAM wParam, _In_ LPARAM lParam);
 }

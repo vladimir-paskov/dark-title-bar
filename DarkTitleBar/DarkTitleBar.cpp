@@ -1,6 +1,10 @@
 // DarkTitleBar.cpp : Defines the entry point for the application.
 //
 
+#pragma comment(linker,"\"/manifestdependency:type='win32' \
+name='Microsoft.Windows.Common-Controls' version='6.0.0.0' \
+processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
+
 #include "framework.h"
 #include "DarkTitleBar.h"
 #include "ShellHook.h"
@@ -51,6 +55,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 {
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
+
+	InitCommonControls();
 
 	RegisterDarkTitleBarClass(hInstance);
 
@@ -281,22 +287,25 @@ LRESULT TrayMsgHandler(HWND hParent, WPARAM wParam, LPARAM lParam)
 }
 
 // Message handler for about box.
-INT_PTR CALLBACK AboutProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
-{
-	UNREFERENCED_PARAMETER(lParam);
-	switch (message)
-	{
-		case WM_INITDIALOG:
-			return (INT_PTR)TRUE;
+INT_PTR CALLBACK AboutProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam) {
 
-		case WM_COMMAND:
-			if (LOWORD(wParam) == IDOK || LOWORD(wParam) == IDCANCEL)
-			{
+	UNREFERENCED_PARAMETER(lParam);
+
+	switch (message) {
+		case WM_INITDIALOG: {
+			DwmUseImmersiveDarkModeIfNeeded(hDlg);
+			return (INT_PTR)TRUE;
+		}			
+
+		case WM_COMMAND: {
+			if (LOWORD(wParam) == IDOK || LOWORD(wParam) == IDCANCEL) {
 				EndDialog(hDlg, LOWORD(wParam));
 				return (INT_PTR)TRUE;
 			}
 			break;
+		}			
 	}
+
 	return (INT_PTR)FALSE;
 }
 

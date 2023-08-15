@@ -9,6 +9,8 @@
 // Windows Header Files
 #include <windows.h>
 #include <Shellapi.h>
+#include <commctrl.h>
+#include <dwmapi.h>
 // C RunTime Header Files
 #include <stdlib.h>
 #include <malloc.h>

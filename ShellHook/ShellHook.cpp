@@ -18,15 +18,27 @@ BOOL                IsColorLight(UI::Color& clr) {
 }
 
 extern "C" {
+	SHELLHOOK_API BOOL IsDarkMode() {
+		auto foregroundColor = gl_uiSettings.GetColorValue(UIColorType::Foreground);
+		return IsColorLight(foregroundColor);
+	}
+
+	SHELLHOOK_API VOID DwmUseImmersiveDarkModeIfNeeded(_In_ HWND hWnd) {
+		if (!IsDarkMode()) return;
+		if (!IsWindow(hWnd)) return;
+
+		BOOL useDarkMode = TRUE;
+		DwmSetWindowAttribute(hWnd, DWMWA_USE_IMMERSIVE_DARK_MODE, &useDarkMode, sizeof(useDarkMode));
+	}
+
 	SHELLHOOK_API LRESULT CALLBACK ShellProc(_In_ int nCode, _In_ WPARAM wParam, _In_ LPARAM lParam) {
 		__pragma(message(__FUNCDNAME__));
 
 		switch (nCode) {
 			case HSHELL_WINDOWCREATED:
-			case HSHELL_WINDOWACTIVATED: {
-				auto foregroundColor = gl_uiSettings.GetColorValue(UIColorType::Foreground);
+			case HSHELL_WINDOWACTIVATED: {		
 
-				BOOL useDarkMode = IsColorLight(foregroundColor);
+				BOOL useDarkMode = IsDarkMode();
 				HWND hWindow = (HWND)wParam;
 
 				BOOL isAlreadyDark;
